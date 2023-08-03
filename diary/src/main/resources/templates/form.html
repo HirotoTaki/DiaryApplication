@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>日記アプリ</title>
+		<!-- bootstrapを読み込む -->
+		<link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}">
+		<script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+		<!-- jqueryを読み込む -->
+		<script type="text/javascript" th:src="@{/js/code.jquery.com_jquery-3.7.0.min.js}"></script>
+		<!-- bootstrap-datepickerを読み込む -->
+		<link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap-datepicker.min.css}">
+		<script type="text/javascript" th:src="@{/js/bootstrap-datepicker.min.js}"></script>
+		<script type="text/javascript" th:src="@{/js/bootstrap-datepicker.ja.min.js}"></script>
+	</head>
+	
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-light" style="background-color:#CCFFFF;">
+			<span class="navbar-brand">
+				<strong>日記アプリ</strong>
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-book"
+					viewBox="0 0 16 16">
+					<path
+						d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z" />
+				</svg>
+			</span>
+			<div class="collapse navbar-collapse justify-content-end">
+				<ul class="navbar-nav">
+					<li class="nav-item ">
+						<span class="navbar-text" th:text="ログインユーザ"></span>
+					</li>
+				</ul>
+				<form method="POST">
+					<button type="submit" class="btn btn-link">ログアウト</button>
+				</form>
+			</div>
+		</nav>
+		<div class="container-fluid">
+			
+			<h2 th:if="${error}" style="color: red;">[[${error}]]</h2>
+			
+			<div class="create m-2">
+				<form id="form" class="needs-validation" novalidate method="POST"
+					th:action="${update}? @{/update}: @{/insert}" th:object="${putForm}" onsubmit="return check()">
+					<!-- ↑updateがtrueなら/update、falseなら/insertに遷移 -->
+					<!-- ↓updateがtrueなら編集を表示、falseなら新規作成を表示 -->
+					<p class="p-1 h4" th:text="${update}? 編集: 新規作成"></p>
+					
+					<div class="row justify-content-center">
+						<div class="form-group col-8">
+							<label for="dateForm">日付</label>
+							<input type="text" class="form-control" name="dateForm" id="date_sample"
+								th:value="${#dates.format(putForm.dateForm, 'yyyy/MM/dd')}" required>
+							<div class="invalid-feedback">必須入力です</div>
+						</div>
+					</div>
+					
+					<div class="row justify-content-center">
+						<div class="form-group col-8">
+							<label for="categoryForm">分類</label>
+							<select id="categoryForm" class="form-select col-8" name="categoryForm" 　th:value="*{categoryForm}"
+								required>
+								<option selected></option>
+								<option value="1" th:selected="*{categoryForm} == 1">仕事</option>
+								<option value="2" th:selected="*{categoryForm} == 2">趣味</option>
+								<option value="3" th:selected="*{categoryForm} == 3">その他</option>
+							</select>
+							<div class="invalid-feedback">必須入力です</div>
+						</div>
+					</div>
+					
+					<div class="row justify-content-center">
+						<div class="form-group col-8">
+							<label for="title">題名</label>
+							<input type="text" class="form-control" name="titleForm" id="title" th:value="*{titleForm}" required>
+							<div class="invalid-feedback">入力必須です</div>
+						</div>
+					</div>
+					
+					<div class="row justify-content-center">
+						<div class="form-group col-8">
+							<label for="floatingTextarea">内容</label>
+							<textarea class="form-control" placeholder="日記の内容" name="contentForm" th:text="*{contentForm}"
+								style="height: 200px"></textarea>
+						</div>
+					</div>
+					
+					<input type="hidden" name="id" th:value="*{id}">
+					<div class="row justify-content-end">
+						<div class="col-1">
+							<button type="submit" class="btn btn-primary" th:name="${update}? update : insert"
+								th:text="${update}? 更新: 登録" onClick="btn='insert'"></button>
+						</div>
+						<div class="col-1">
+							<button type="submit" class="btn btn-light" name="back" onClick="btn='back'">一覧へ</button>
+						</div>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+	</body>
+	
+	<script>
+		$('#date_sample').datepicker({
+			format: 'yyyy/mm/dd',
+			language: 'ja',
+			autoclose: true,
+		});
+	
+		const check = (event) => {
+			//　一覧ボタン押下した場合はチェックしない
+			if (btn === 'back') {
+				return true;
+			}
+	
+			const form = document.getElementById('form');
+			if (!form.checkValidity()) {
+				form.classList.add('was-validated');
+				return false;
+			} else {
+				return true;
+			}
+		};
+	</script>
+
+</html>

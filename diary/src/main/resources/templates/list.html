@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>日記アプリ</title>
+		
+		<!-- bootstrapを読み込む -->
+		<link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}">
+		<script type="text/javascript" th:src="@{/js/bootstrap.bundle.min.js}"></script>
+		
+		<!-- jqueryを読み込む -->
+		<script type="text/javascript" th:src="@{/js/code.jquery.com_jquery-3.7.0.min.js}"></script>
+		
+		<!-- bootstrap-datepickerを読み込む -->
+		<link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap-datepicker.min.css}">
+		<script type="text/javascript" th:src="@{/js/bootstrap-datepicker.min.js}"></script>
+		<script type="text/javascript" th:src="@{/js/bootstrap-datepicker.ja.min.js}"></script>
+		
+		<!-- date-tableを読み込む -->
+		<link rel="stylesheet" type="text/css" th:href="@{/css/datatables.min.css}"/>
+		<script type="text/javascript" th:src="@{/js/datatables.min.js}"></script>
+		
+	</head>
+  
+  
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-light" style="background-color:#CCFFFF;">
+			<span class="navbar-brand">
+				<strong>日記アプリ</strong>
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-book" viewBox="0 0 16 16">
+					<path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+				</svg>
+			</span>
+			<div class="collapse navbar-collapse justify-content-end">
+				<ul class="navbar-nav">
+					<li class="nav-item ">
+						<span class="navbar-text" th:text="ログインユーザ"></span>
+					</li>
+				</ul>
+				<form method="POST">
+					<button type="submit" class="btn btn-link">ログアウト</button>
+				</form>
+			</div>
+		</nav>
+		<div class="container-fluid">
+			
+			<div class="search m-2">
+				
+				<form method="GET" th:action="@{/diary}" th:object="${getForm}">
+					
+					<div class="row">
+						<div class="form-group col-3 m-2">
+							<label for="category">分類</label>
+							<!--「DiaryController.java」で記載した「model.addAttribute(“getForm”, form)」の値を受け取る-->
+							<select id="category" name="category" class="form-select col-2" th:value="${getForm.category}">
+								<!-- プルダウンメニュー-->
+								<!--
+									下記のように記載することでプルダウンのいずれかが
+									選択後、選択されたものが表示されたままにすることが
+									できる。
+								-->
+								<option></option>
+								<option value="1" th:selected="${getForm.category} == 1">仕事</option>
+								<option value="2" th:selected="${getForm.category} == 2">趣味</option>
+								<option value="3" th:selected="${getForm.category} == 3">その他</option>
+							</select>
+						</div>
+						
+						<div class="form-group col-3 m-2">
+							<label for="category">年月</label>
+							<!-- 値が入っていればその値を入力された状態となる -->
+							<input type="text" class="form-control" id="date_sample" name="date" th:value="${getForm.date}">
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-1 m-1">
+							<button type="submit" class="btn btn-primary">検索</button>
+						</div>
+					</div>
+					
+				</form>
+			</div>
+			
+			<div class="list">
+				<table id="table" class="table table-striped table-hover">
+					<thead class="thead-lignt">
+						<tr>
+							<th class="col-2">日付</th>
+							<th class="col-2">分類</th>
+							<th class="col-6">題名</th>
+							<th class="col-1"></th>
+							<th class="col-1"></th>
+						</tr>
+					</thead>
+					
+					<tbody>
+						<!--
+							th:each=”item: ${list}"によりtrとtdをループしている
+							ここのデータは検索条件の時と同様「DiaryController.java」
+							の「model.addAttribute(“list”, list)」の値を受け取っている
+							listに格納されているデータ数分ループする
+						 -->
+						<tr th:each="item: ${list}">
+							<td th:text=${item.date}></td>
+							<td th:text=${item.name}></td>
+							<td th:text=${item.title}></td>
+							<td>
+								<a class="btn btn-primary" th:href="@{/{id}(id=${item.id})}">詳細</a>
+							</td>
+							<td>
+								<form method="POST" th:action="@{/delete}">
+									<input type="hidden" th:value="${item.id}" name="id">
+									<button type="button" class="btn btn-danger" data-bs-toggle="modal"
+										th:data-bs-target="'#id' + ${item.id}">削除</button>
+										
+									<!-- Modal -->
+									<div class="modal fade" th:id="'id' + ${item.id}" tabindex="-1" aria-hidden="true">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+												</div>
+												<div class="modal-body">
+													削除してもよろしいですか？
+												</div>
+												<div class="modal-footer">
+													<button type="submit" class="btn btn-danger">削除</button>
+													<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+												</div>
+											</div>
+										</div>
+									</div>
+									
+								</form>
+							</td>
+						</tr>
+						
+					</tbody>
+				</table>
+			</div>
+			
+			<form method="POST" th:action="@{/form}">
+				<div class="footer-button row justify-content-end">
+					<div class="col-1 m-1">
+						<button type="submit" class="btn btn-primary">日記作成</button>
+						<input type="hidden"  name="isUpdate" value=false>
+					</div>
+				</div>
+			</form>
+			
+		</div>
+	</body>
+
+	<script>
+		$('#date_sample').datepicker({
+			format: 'yyyy/mm',
+			language: 'ja',
+			autoclose: true,
+			minViewMode: 'months'
+		});
+		$.extend( $.fn.dataTable.defaults, {
+			language: {
+				url: "http://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json"
+			}
+		});
+		$("#table").DataTable({
+			// 検索機能 無効
+			searching: false,
+			scrollY: 250
+		});
+	</script>
+</html>
+
