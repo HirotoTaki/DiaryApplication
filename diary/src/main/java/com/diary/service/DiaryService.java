@@ -42,20 +42,16 @@ public class DiaryService {
 		if (form.getCategory() == "" && form.getDate() == ""
 			|| form.getCategory() == null && form.getDate() == null) {
 			resultList = dao.findListNoConditions();
-			System.out.println("無");
 			
 		// 検索条件：　分類
 		} else if (form.getCategory() != "" && form.getDate() == "") {
 			resultList = dao.findListAndCategory(form.getCategory());
-			System.out.println("分類");
 		// 検索条件：　年月
 		} else if (form.getDate() != "" && form.getCategory() == "") {
 			resultList = dao.findLisAndDate(form.getDate());
-			System.out.println("年月");
 		// 検索条件：　分類と年月
 		} else {
 			resultList = dao.findListAndCategoryDate(form.getCategory(), form.getDate());
-			System.out.println("分類と年月");
 		}
 		
 		List<Diary> list = new ArrayList<Diary>();
