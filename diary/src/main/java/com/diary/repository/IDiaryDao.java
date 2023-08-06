@@ -54,8 +54,8 @@ public interface IDiaryDao {
 	
 	// 日記を登録する
 	@Insert({
-		"INSERT INTO diary(category, title, content, date , up_datetime)",
-		"VALUES(#{category}, #{title}, #{d}, #{content}, #{date}, #{up_date})"
+		"INSERT INTO diary(category, title, content, date , update_datetime)",
+		"VALUES(#{category}, #{title}, #{content}, #{date}, #{up_datetime})"
 	})
 	public int insert(String category, String title, String content, Date date, Timestamp up_datetime);
 	
@@ -70,7 +70,7 @@ public interface IDiaryDao {
 	// 日記を更新する
 	@Update({
 		"UPDATE diary",
-		"SET category= #{category}, title= #{title}, content= #{content}, date= #{date}, update_datetime= #{up_date}",
+		"SET category= #{category}, title= #{title}, content= #{content}, date= #{date}, update_datetime= #{up_datetime}",
 		"WHERE id= #{id}"
 	})
 	int update(String category, String title, String content, Date date, Timestamp up_datetime, int id);

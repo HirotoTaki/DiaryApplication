@@ -42,16 +42,20 @@ public class DiaryService {
 		if (form.getCategory() == "" && form.getDate() == ""
 			|| form.getCategory() == null && form.getDate() == null) {
 			resultList = dao.findListNoConditions();
+			System.out.println("無");
 			
 		// 検索条件：　分類
 		} else if (form.getCategory() != "" && form.getDate() == "") {
-			dao.findListAndCategory(form.getCategory());
+			resultList = dao.findListAndCategory(form.getCategory());
+			System.out.println("分類");
 		// 検索条件：　年月
 		} else if (form.getDate() != "" && form.getCategory() == "") {
-			dao.findLisAndDate(form.getDate());
+			resultList = dao.findLisAndDate(form.getDate());
+			System.out.println("年月");
 		// 検索条件：　分類と年月
 		} else {
-			dao.findListAndCategoryDate(form.getCategory(), form.getDate());
+			resultList = dao.findListAndCategoryDate(form.getCategory(), form.getDate());
+			System.out.println("分類と年月");
 		}
 		
 		List<Diary> list = new ArrayList<Diary>();
@@ -85,6 +89,7 @@ public class DiaryService {
 		int count = 0;
 		
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		
 		count = dao.insert(form.getCategoryForm(), form.getTitleForm(), form.getContentForm(), form.getDateForm(), timestamp);
 	    return count;
 	}
