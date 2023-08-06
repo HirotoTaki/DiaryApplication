@@ -22,5 +22,4 @@ public class PostForm {
 	private String titleForm;
 
 	private String contentForm;
-
 }

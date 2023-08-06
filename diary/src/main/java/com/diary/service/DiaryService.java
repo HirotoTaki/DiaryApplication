@@ -1,6 +1,9 @@
 package com.diary.service;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -33,8 +36,39 @@ public class DiaryService {
 
 	
 	public List<Diary> findList(GetForm form) {
-		return dao.findList(form);
+		List<Map<String, Object>> resultList = null;
 		
+		// 検索条件：　無
+		if (form.getCategory() == "" && form.getDate() == ""
+			|| form.getCategory() == null && form.getDate() == null) {
+			resultList = dao.findListNoConditions();
+			
+		// 検索条件：　分類
+		} else if (form.getCategory() != "" && form.getDate() == "") {
+			dao.findListAndCategory(form.getCategory());
+		// 検索条件：　年月
+		} else if (form.getDate() != "" && form.getCategory() == "") {
+			dao.findLisAndDate(form.getDate());
+		// 検索条件：　分類と年月
+		} else {
+			dao.findListAndCategoryDate(form.getCategory(), form.getDate());
+		}
+		
+		List<Diary> list = new ArrayList<Diary>();
+		
+		for (Map<String, Object> result : resultList) {
+			// diaryエンティティにデータを詰めている。
+			Diary diary = new Diary();
+			diary.setId((int) result.get("id"));
+			diary.setCategory((String) result.get("category"));
+			diary.setTitle((String) result.get("title"));
+			diary.setContent((String) result.get("content"));
+			diary.setDate((String) result.get("date"));
+			diary.setUpdate_datetime((Timestamp) result.get("update_datetime"));
+			diary.setName((String) result.get("name"));
+			list.add(diary);
+		}
+		return list;
 	}
 	
 	
@@ -48,16 +82,26 @@ public class DiaryService {
 	
 	
 	public int insert(PostForm form) {
-	    return dao.insert(form);
+		int count = 0;
+		
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		count = dao.insert(form.getCategoryForm(), form.getTitleForm(), form.getContentForm(), form.getDateForm(), timestamp);
+	    return count;
 	}
 	
 	public int update(PutForm form) {
-		return dao.update(form);
+		int count = 0;
+		
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		count = dao.update(form.getCategoryForm(), form.getTitleForm(), form.getContentForm(), form.getDateForm(), timestamp, form.getId());
+		return count;
 	}
 	
 	
 	public int delete(int id) {
-	    return dao.delete(id);
+		int count = 0;
+		count = dao.delete(id);
+	    return count;
 	}
 }
 
